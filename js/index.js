@@ -45,10 +45,26 @@ const obtenerProductosApi = async () => {
 };
 
 const productosLs = JSON.parse(localStorage.getItem("productos")) || [];
+const usuariosLs = JSON.parse(localStorage.getItem("usuarios")) || [];
 
 if (!productosLs.length) {
   obtenerProductosApi();
 }
+
+const inputUsuario = document.getElementById("idInputUsuario");
+const inputEmail = document.getElementById("idInputEmail");
+const inputContrasenia = document.getElementById("idInputContrasenia");
+const inputRepContrasenia = document.getElementById("idInputRepContrasenia");
+const inputCheck = document.getElementById("idInputCheck");
+const botonRegistro = document.getElementById("idBotonRegistro");
+const divErrorUsuario = document.getElementById("idDivErrorUsuario");
+
+const inputUsuarioIs = document.getElementById("idInputUsuarioIniciarSesion");
+const inputContraseniaIs = document.getElementById(
+  "idInputContraseniaIniciarSesion"
+);
+const botonInicioDeSesion = document.getElementById("idBotonIniciarSesion");
+divErrorUsuario.classList.add("d-none");
 
 const filaProductos = document.getElementById("idRowProductos");
 
@@ -63,9 +79,11 @@ const res = productosLs.map(
        alt="..."
        />
        <div class="card-body">
-         <h5 class="card-title">${producto.titulo}</h5>
-          <p class="card-text">
-          ${producto.descripcion}
+         <h5 class="card-title text-truncate">${
+           producto?.titulo || producto?.title
+         }</h5>
+          <p class="card-text text-truncate">
+          ${producto?.descripcion || producto?.description}
           </p>
           <div class="text-center">
            <a href="../paginas/productos/detalle-producto.html?id=${
@@ -121,3 +139,112 @@ filaProductos.innerHTML = res.join("");
   cardBoton.appendChild(etiquetaADelBoton);
 });
  */
+
+const registroUsuario = (ev) => {
+  ev.preventDefault();
+
+  if (!inputUsuario.value) {
+    inputUsuario.classList.add("is-invalid");
+    divErrorUsuario.classList.remove("d-none");
+  } else if (!inputEmail.value) {
+    alert("Campo Email vacio");
+  }
+
+  if (
+    inputUsuario.value &&
+    inputEmail.value &&
+    inputContrasenia.value &&
+    inputRepContrasenia.value &&
+    inputCheck.checked
+  ) {
+    const usuarioExiste = usuariosLs.find(
+      (usuario) => usuario.nombreUsuario === inputUsuario.value.toLowerCase()
+    );
+
+    const emailExiste = usuariosLs.find(
+      (usuario) => usuario.emailUsuario === inputEmail.value.toLowerCase()
+    );
+
+    if (usuarioExiste || emailExiste) {
+      alert("Este usuario o email no esta disponible");
+      return;
+    }
+
+    /*     if (emailExiste) {
+      alert("Este email no esta disponible");
+      return;
+    } */
+
+    /*     const validarFormatoEmail = new RegExp(
+      /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/
+    );
+
+    console.log(validarFormatoEmail.test(inputEmail.value)); */
+
+    if (inputContrasenia.value === inputRepContrasenia.value) {
+      const nuevoUsuario = {
+        id: usuariosLs[usuariosLs.length - 1]?.id + 1 || 1,
+        nombreUsuario: inputUsuario.value.toLowerCase(),
+        emailUsuario: inputEmail.value.toLowerCase(),
+        contraniaUsuario: inputContrasenia.value,
+        rol: "usuario",
+        login: false,
+        status: "enabled",
+      };
+
+      usuariosLs.push(nuevoUsuario);
+      localStorage.setItem("usuarios", JSON.stringify(usuariosLs));
+
+      inputUsuario.value = "";
+      inputEmail.value = "";
+      inputContrasenia.value = "";
+      inputRepContrasenia.value = "";
+      inputCheck.checked = false;
+
+      //location.reload();
+    } else {
+      alert("Las contraseñas no son iguales");
+    }
+  }
+};
+
+const validarInputUsuario = (ev) => {
+  if (ev.target.value) {
+    inputUsuario.classList.remove("is-invalid");
+    divErrorUsuario.classList.add("d-none");
+  } else {
+    inputUsuario.classList.add("is-invalid");
+    divErrorUsuario.classList.remove("d-none");
+  }
+};
+
+const iniciarSesionUsuario = (ev) => {
+  ev.preventDefault();
+  const usuarioExiste = usuariosLs.find(
+    (usuario) => usuario.nombreUsuario === inputUsuarioIs.value
+  );
+  if (usuarioExiste) {
+    if (usuarioExiste.contraniaUsuario === inputContraseniaIs.value) {
+      usuarioExiste.login = true;
+      localStorage.setItem("usuarios", JSON.stringify(usuariosLs));
+
+      if (usuarioExiste.rol === "usuario") {
+        setTimeout(() => {
+          location.href = "../paginas/usuario.html";
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          location.href = "../paginas/admin.html";
+        }, 1000);
+      }
+    } else {
+      alert("Usuario y/o contraseña no coinciden. CONTRASEÑA");
+    }
+  } else {
+    alert("Usuario y/o contraseña no coinciden. USUARIO");
+  }
+};
+
+botonRegistro.addEventListener("click", registroUsuario);
+inputUsuario.addEventListener("input", validarInputUsuario);
+botonInicioDeSesion.addEventListener("click", iniciarSesionUsuario);

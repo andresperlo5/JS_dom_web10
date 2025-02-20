@@ -13,11 +13,13 @@ const productoClickeado = productosLs.find(
 
 divDetalleProducto.innerHTML = `
   <div>
-    <img src="${productoClickeado.imagen}" alt="" width='200'/>
+    <img src="${
+      productoClickeado?.imagen || productoClickeado?.image
+    }" alt="" width='200'/>
   </div>
    <div>
-     <h3>${productoClickeado.titulo}</h3>
-     <p>${productoClickeado.descripcion}</p>
+     <h3>${productoClickeado?.titulo || productoClickeado?.title}</h3>
+     <p>${productoClickeado?.descripcion || productoClickeado?.description}</p>
       <button class="btn btn-warning">Agregar Carrito</button>
       <button class="btn btn-danger">Agregar Favorito</button>
     </div>
